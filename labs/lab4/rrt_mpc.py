@@ -10,6 +10,7 @@ from visualization_msgs.msg import Marker
 
 import os
 import pickle
+import time
 
 from core.interfaces import ArmController
 from lib.rrt import rrt
@@ -21,11 +22,11 @@ from copy import deepcopy
 
 starts = [np.array([-pi/4, 0, 0, -pi/2, 0, pi/2, pi/4]),
           np.array([0, 0.4, 0, -2.5, 0, 2.7, 0.707]),
-          np.array([0, -1, 0, -2, 0, 1.57, 0]),
+          np.array([-pi/4, 0, 0, -pi/2, 0, pi/2, pi/4]),
           np.array([0, -1, 0, -2, 0, 1.57, 0])]
 goals = [np.array([pi/4, pi/5, 0, -pi/3, 0, pi/2, pi/4]),
          np.array([1.9, 1.57, -1.57, -1.57, 1.57, 1.57, 0.707]),
-         np.array([0, -1, 0, -2, 0, 1.57, 0]),
+         np.array([pi/4, pi/4, 0, -pi/3, 0, pi/2, pi/4]),
          np.array([1.9, 1.57, -1.57, -1.57, 1.57, 1.57, 0.707])]
 mapNames = ["map1",
             "map2",
@@ -59,19 +60,22 @@ if __name__ == "__main__":
     path = rrt(deepcopy(map_struct), deepcopy(starts[index]), deepcopy(goals[index]))
     stop = perf_counter()
     dt = stop - start
-    
+    print('--------Implementing RRT------------')
+
     print("RRT took {time:2.2f} sec. Path is.".format(time=dt))
     print(np.round(path,4))
     
-    input("Press Enter to Send Path to Arm")
-    print(len(path))
+    # input("Press Enter to Send Path to Arm")
+    # print(len(path))
 
+    print('-------Implementing MPC--------------')
+    
     saved_state = {'q':[], 'qdot':[], 'qddot':[]}
 
     for idx1 in range(len(path)-1):
         p1 = path[idx1]
         p2 = path[idx1+1]
-        q_joints, Control_input, time, loss_vals = run_to_position(p1, p2)
+        q_joints, Control_input, time_stamp, loss_vals = run_to_position(p1, p2)
 
         for idx2 in range(len(q_joints)):
             # if idx2%25 == 0:
@@ -99,25 +103,31 @@ if __name__ == "__main__":
                                     q_joints[idx2][17],
                                     q_joints[idx2][20]])
 
-                print("Trajectory Complete!")
-                arm.safe_set_joint_positions_velocities(q, q_dot)
+                # arm.safe_set_joint_positions_velocities(q, q_dot)
+                # arm.set_joint_positions_velocities_torque(q,  q_dot, q_ddot)
 
                 ############# DONT REMOVE PRINT STATEMENTS #####################################
-                print('q: ',q)
-                print('----------')
-                print('q_dot: ',q_dot)
-                print('----------')
+                # print('q: ',q)
+                # print('----------')
+                # print('q_dot: ',q_dot)
+                # print('----------')
+                # time.sleep(0.02)
 
-                # arm.set_joint_positions_velocities_torque(q,  q_dot, q_ddot)
     
                 # arm.move_to_position(qq)
-                # saved_state['q'].append(q)
-                # saved_state['qdot'].append(q_dot)
-                # saved_state['qddot'].append(q_ddot)
+                saved_state['q'].append(q)
+                saved_state['qdot'].append(q_dot)
+                saved_state['qddot'].append(q_ddot)
     
+
+    for idx in range(len(saved_state['q'])):
+        arm.set_joint_positions_velocities_torque(saved_state['q'][idx],  saved_state['qdot'][idx], saved_state['qddot'][idx])
+        time.sleep(0.02)
+
+
     # with open("mpc_var", "wb") as fp:
     #     pickle.dump(saved_state, fp)
-    
+    print("Trajectory Complete!")
 
 
     

@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
 
 def simulate_arm(x0, x_final, tf, robotic_arm):
   t0 = 0.0
-  dt = 1e-2
+  dt = 1e-1
 
   x = [x0]
   u = [np.zeros((7,))]
   t = [t0]
-  printvar = True
+  printvar = False
   xf        = np.array([x_final[0], x_final[3], x_final[6], x_final[9], x_final[12], x_final[15], x_final[18]])
   current_q = np.array([x0[0], x0[3], x0[6], x0[9], x0[12], x0[15], x0[18]])
 
