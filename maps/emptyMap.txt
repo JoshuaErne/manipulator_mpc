@@ -1,0 +1,9 @@
+# empty map
+#
+# usage:
+# element x_min y_min z_min x_max y_max z_max
+#
+# you must specify the boundary of your map using the 'boundary' element
+# and can optionally include obstacles using the 'block' element
+
+boundary -400.0 -400.0 -200.0 400.0 400.0 500.0

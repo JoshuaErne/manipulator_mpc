@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <arg name="x" default="0"/>
+  <arg name="y" default="0"/>
+  <arg name="z" default="0"/>
+  <arg name="roll" default="0"/>
+  <arg name="pitch" default="0"/>
+  <arg name="yaw" default="0"/>
+
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="load_gripper" default="true"/>
+  <arg name="use_custom_action_servers" default="true"/>
+  <arg name="start_moveit" default="false"/>
+  <arg name="load_demo_planning_scene" default="false"/>
+  <arg name="force_neutral_pose" default="true"/> <!-- Use a separate script to send robot to the neutral pose in the beginning of simulation -->
+
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <arg name="world" default="$(find meam520_labs)/worlds/empty.world"/>
+
+  <arg name="ns" default="panda_simulator"/>
+  <!-- TODO: This argument should load the electric gripper -->
+
+  <!-- This argument fixes the robot statically to the world -->
+  <arg name="static" default="true"/>
+
+  <!-- This argument dictates whether gazebo should be launched in this file -->
+  <arg name="load_gazebo" default="true"/>
+
+  <rosparam command="load" file="$(find panda_gazebo)/config/robot_details.yaml"/>
+
+
+  <!-- <param name="robot_description" command="$(find xacro)/xacro $(find franka_panda_description)/robots/panda_arm_hand.urdf.xacro load_gripper:=$(arg load_gripper) load_gazebo:=true"/> -->
+  <param name="robot_description" textfile="$(find meam520_labs)/urdf/nogravity.urdf"/>
+
+
+  <param name="/arm/root_name" value="panda_link0" />
+  <param if="$(arg load_gripper)" name="/arm/tip_name" value="panda_hand" />
+  <param unless="$(arg load_gripper)" name="/arm/tip_name" value="panda_link8" />
+
+  <param if="$(arg load_gripper)" name="/franka_gripper/robot_ip" value="sim" />
+
+  <param if="$(arg load_gripper)" name="/arm/gravity_tip_name" value="panda_hand" />
+  <param unless="$(arg load_gripper)" name="/arm/gravity_tip_name" value="panda_link8" />
+
+  <!-- We resume the logic in empty_world.launch, changing the name of the world to be launched -->
+  <include if="$(arg load_gazebo)" file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world)"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+
+  <!-- This argument sets the initial joint states -->
+  <arg name="initial_joint_states"
+    default=" -J panda::panda_joint1 0.000
+              -J panda::panda_joint2 -0.785
+              -J panda::panda_joint3 0.0
+              -J panda::panda_joint4 -2.356
+              -J panda::panda_joint5 0.0
+              -J panda::panda_joint6 1.57
+              -J panda::panda_joint7 0.785"/>
+
+  <!-- Spawn urdf of the robot -->
+  <node name="robot_description" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model panda $(arg initial_joint_states)
+      -x $(arg x) -y $(arg y) -z $(arg z)
+      -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)
+    "/>
+
+
+  <!-- -x $(arg x) -y $(arg y) -z $(arg z)
+  -R $(arg roll) -P $(arg pitch) -Y $(arg yaw) -->
+
+  <!-- create a tf with base frame as 'base' (to match aml_robot) -->
+  <node pkg="tf" type="static_transform_publisher" name="base_to_link0" args="0 0 0 0 0 0 1 base panda_link0 100" />
+  <node pkg="tf" type="static_transform_publisher" name="world_to_base" args="0 0 0 0 0 0 1 world base 100" />
+
+  <!-- ros_control panda launch file -->
+  <include file="$(find panda_sim_controllers)/launch/panda_sim_controllers.launch">
+      <arg name="gui" value="$(arg gui)" />
+      <arg name="ns" value="$(arg ns)" />
+      <arg name="load_gripper" value="$(arg load_gripper)" />
+  </include>
+
+  <group if="$(eval arg('use_custom_action_servers') == true)">
+    <node pkg="panda_sim_custom_action_server" type="start_joint_trajectory_server.py" name="joint_trajectory_server_emulator"/>
+
+      <group if="$(eval arg('load_gripper') == true)">
+        <node pkg="panda_sim_custom_action_server" type="start_gripper_action_server.py" name="gripper_action_server_emulator"/>
+      </group>
+
+    <group if="$(eval arg('start_moveit') == true)">
+      <include file="$(find panda_sim_moveit)/launch/sim_move_group.launch">
+        <arg name="load_gripper" value="$(arg load_gripper)" />
+        <arg name="info" value="true" />
+      </include>
+    </group>
+
+  </group>
+
+   <group if="$(eval arg('load_demo_planning_scene') == true)">
+    <node name="demo_scene_loader" pkg="franka_moveit" type="create_demo_planning_scene.py" respawn="false" output="screen" />
+  </group>
+
+  <group if="$(eval arg('force_neutral_pose') == true)">
+      <node pkg="panda_gazebo" type="force_neutral_pose.py" name="startup_script"/>
+  </group>
+
+
+
+</launch>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <include file="$(find meam520_labs)/launch/single.launch">
+    <arg name="headless" value="true" />
+    <arg name="gui" value="false" />
+    <arg name="world" value="$(find meam520_labs)/worlds/lab3.world" />
+  </include>
+
+ <arg name="rvizconfig" default="$(find meam520_labs)/config/lab3.rviz" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <node pkg="tf" type="static_transform_publisher" name="ee" args="0 0 .103 0 0 0 1  /panda_hand /endeffector  10"/>
+
+</launch>

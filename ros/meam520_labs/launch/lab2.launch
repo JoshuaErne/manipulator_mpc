@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <include file="$(find meam520_labs)/launch/single.launch">
+    <arg name="headless" value="true" />
+    <arg name="gui" value="false" />
+    <arg name="world" value="$(find meam520_labs)/worlds/lab1.world" />
+  </include>
+
+ <arg name="rvizconfig" default="$(find meam520_labs)/config/lab2.rviz" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <node pkg="tf" type="static_transform_publisher" name="ee" args="0 0 .103 0 0 0 1  /panda_hand /endeffector  10"/>
+
+  <!--
+    JOINT COORDINATE FRAMES
+    These coordinate frames are used to display the joint velocity annotations in rviz.
+    Each frame is located with its origin at the canonical joint position and its z axis
+    along the joint axis, in the direction satisfying the RHR for the positive sense
+    of rotation according to PANDA manufacturers.
+ -->
+  <node pkg="tf" type="static_transform_publisher" name="joint0" args="   0     0  .141   0 0     0  /panda_link0 /joint0  10"/>
+  <node pkg="tf" type="static_transform_publisher" name="joint1" args="   0     0     0   0 0 -1.57 /panda_link1 /joint1  10"/>
+  <node pkg="tf" type="static_transform_publisher" name="joint2" args="   0 -.195     0   0 0  1.57  /panda_link2 /joint2  10"/>
+  <node pkg="tf" type="static_transform_publisher" name="joint3" args=".082     0     0   0 0  1.57  /panda_link3 /joint3  10"/>
+  <node pkg="tf" type="static_transform_publisher" name="joint4" args="   0     0 -.259   0 0     0  /panda_link5 /joint4  10"/>
+  <node pkg="tf" type="static_transform_publisher" name="joint5" args="   0     0 -.015   0 0     0  /panda_link6 /joint5  10"/>
+  <node pkg="tf" type="static_transform_publisher" name="joint6" args="   0     0  .051   0 0     0  /panda_link7 /joint6  10"/>
+
+</launch>

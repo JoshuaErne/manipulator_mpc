@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="rvizconfig" default="$(find meam520_labs)/config/detections.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <node pkg="tf" type="static_transform_publisher" name="world_to_camera"
+    args=".5 0 0 0 0  0  /tag0_0 /base 1"/>
+
+  <node pkg="meam520_labs" name="tf_tag_visualizer" type="detections.py" output="log" />
+
+</launch>

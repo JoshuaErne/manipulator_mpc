@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<robot name="wood_cube_5cm">
+
+  <material name="green">
+    <color rgba="0.043 0.611 0.192 1"/>
+  </material>
+
+  <material name="purple">
+    <color rgba=".25 .15 .5 1"/>
+  </material>
+
+    <material name="white">
+      <color rgba=".8 .8 .8 1"/>
+    </material>
+
+  <link name="block">
+    <visual name="visual">
+      <geometry>
+        <box size="0.0508 0.0508 0.0508" />
+      </geometry>
+      <material name="purple" />
+    </visual>
+  </link>
+  <link name="tag6">
+    <visual name="marked">
+      <geometry>
+        <box size="0.0508 0.0508 0.0001" />
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+  <joint name="tag6_joint" type="fixed">
+    <parent link="block"/>
+    <child link="tag6"/>
+    <origin xyz="0 0 0.02542" rpy="0 0 0" />
+  </joint>
+</robot>

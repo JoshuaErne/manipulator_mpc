@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <include file="$(find meam520_labs)/launch/single.launch" />
+
+</launch>

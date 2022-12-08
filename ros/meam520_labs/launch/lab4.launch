@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="map" default="emptymap"/>
+
+  <include file="$(find meam520_labs)/launch/single.launch">
+    <arg name="world" value="$(find meam520_labs)/worlds/$(arg map).world" />
+      <arg name="initial_joint_states"
+        value=" -J panda::panda_joint1 0.000
+              -J panda::panda_joint2 -0.785
+              -J panda::panda_joint3 0.0
+              -J panda::panda_joint4 -0.2
+              -J panda::panda_joint5 0.0
+              -J panda::panda_joint6 1.57
+              -J panda::panda_joint7 0.785"/>
+
+  </include>
+</launch>

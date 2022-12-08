@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="camera">
+    <pose>0 0 0 0 0 0</pose>
+    <link name="sensor">
+      <visual name='lens'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>.02</radius>
+            <length>.05</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>.2 .2 .2 1</ambient>
+          <diffuse>.2 .2 .2 1</diffuse>
+          <specular>.2 .2 .2 1</specular>
+          <emissive>0 0 0 0</emissive>
+        </material>
+      </visual>
+    </link>
+    <joint name="world_fix" type="fixed">
+        <parent>world</parent>
+        <child>camera::sensor</child>
+    </joint>
+  </model>
+</sdf>

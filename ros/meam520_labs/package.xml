@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>meam520_labs</name>
+  <version>0.0.0</version>
+  <description>Launch files, gazebo configurations, and scripts necessary for lab exercises in MEAM520</description>
+
+  <maintainer email="jwelde@seas.upenn.edu">Jake Welde</maintainer>
+  <maintainer email="srozen01@seas.upenn.edu">Shane Rozen-Levy</maintainer>
+  <maintainer email="vmedw@seas.upenn.edu">Victoria Edwards</maintainer>
+  <maintainer email="liuxiu@seas.upenn.edu">Xu Liu</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <build_depend>std_msgs</build_depend>
+  <run_depend>std_msgs</run_depend>
+
+
+</package>

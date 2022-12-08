@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="block_delay" default="5" />
+  <arg name="rviz" default="false" />
+  <arg name="rvizconfig" default="$(find meam520_labs)/config/final.rviz" />
+
+  <arg name="y" value="-.978" if="$(eval arg('team') == 'red')"/>
+  <arg name="y" value=".978" if="$(eval arg('team') == 'blue')"/>
+
+  <arg name="team" />
+  <param name="team" value="$(arg team)" />
+
+  <!-- BASIC ENVIRONMENT -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find meam520_labs)/worlds/final.world"/>
+    <arg name="paused" value="false" />
+  </include>
+
+  <!-- MOVING TURNTABLE -->
+  <include file="$(find meam520_labs)/launch/turntable.launch" ns="turntable" />
+
+  <!-- SCORABLE OBJECTS -->
+  <node pkg="meam520_labs" name="block_spawner" type="block_spawner.py" output="screen"
+    launch-prefix="bash -c 'sleep $(arg block_delay); $0 $@' "/>/>
+
+    <include file="$(find meam520_labs)/launch/single.launch">
+      <arg name="load_gazebo" value="false" />
+      <arg name="x" value="0"/>
+      <arg name="y" value="$(arg y)" />
+      <!-- <arg name="y" value="-.978" if="$(eval arg('team') == 'red')"/>
+      <arg name="y" value=".978" if="$(eval arg('team') == 'blue')"/> -->
+      <arg name="z" value="0"/>
+      <arg name="roll" value="0"/>
+      <arg name="pitch" value="0"/>
+      <arg name="yaw" value="0"/>
+    </include>
+
+    <!-- CAMERA AND CALIBRATION TAG FRAMES -->
+    <node pkg="tf" type="static_transform_publisher" name="ee"
+      args="0 0 .103 0 0 0 1  /panda_hand /endeffector  1"/>
+
+
+      <param name="camera_description" command="$(find xacro)/xacro $(find meam520_labs)/urdf/camera.sdf" />
+      <node name="spawn_camera" pkg="gazebo_ros" type="spawn_model" args="-param camera_description -sdf -model camera
+      -x 0 -y $(arg y) -z 1.5
+      -R 0 -P 3.14159 -Y 0
+      -robot_namespace camera
+      " />
+
+      <param name="tag_description" command="$(find xacro)/xacro $(find meam520_labs)/urdf/tag.sdf id:=0" />
+      <node name="spawn_calibration_tag" pkg="gazebo_ros" type="spawn_model" args="-param tag_description -sdf -model tag0
+      -x -.5 -y $(arg y) -z 0
+      -R 0 -P 0 -Y 0
+      -robot_namespace tag0
+      " />
+
+    <!-- <node pkg="tf" type="static_transform_publisher" name="camera_transform"
+      args="0 0 2 0 3.14 0  /base /camera  1"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tag_transform"
+      args="-.5 0 0 0 0 0  /base /calibration_tag  1"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="world_transform"
+      args="0 $(arg y) 0 0 0 0  /world_frame /world  1"/> -->
+
+    <group if="$(arg rviz)">
+      <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+     </group>
+
+</launch>

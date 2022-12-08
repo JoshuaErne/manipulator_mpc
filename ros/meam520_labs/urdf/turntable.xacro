@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<robot name="table" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <transmission name="base_rotate_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="base_rotate">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="base_rotate_motor">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <xacro:property name="base_radius" value="0.3048" />
+    <xacro:property name="total_height" value="0.02" />
+
+    <link name="world"></link>
+    <link name="base">
+      <visual>
+        <origin xyz="0 0 ${-3*total_height/4}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder length="${total_height/2}" radius="${base_radius/2}"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-3*total_height/4}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder length="${total_height/2}" radius="${base_radius/2}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="3.0"/>
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      </inertial>
+    </link>
+    <link name="upper_base">
+      <visual>
+        <origin xyz="0 0 ${-total_height/4}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder length="${total_height/2}" radius="${base_radius}"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-total_height/4}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder length="${total_height/2}" radius="${base_radius}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="3.0"/>
+        <inertia ixx="0.18" ixy="0.0" ixz="0.0" iyy="0.18" iyz="0.0" izz="0.18"/>
+      </inertial>
+    </link>
+
+
+
+
+    <!-- joints -->
+    <joint name="base_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="world"/>
+      <child link="base"/>
+    </joint>
+    <joint name="base_rotate" type="continuous">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="base"/>
+      <child link="upper_base"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.4" upper="1.4" effort="10" velocity="3.67"/>
+    </joint>
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+  </gazebo>
+
+
+  <gazebo reference="base">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="upper_base">
+    <material>
+      <ambient>.8 .8 .8 1</ambient>
+      <diffuse>.8 .8 .8 1</diffuse>
+      <specular>.8 .8 .8 1</specular>
+      <emissive>0 0 0 0</emissive>
+    </material>
+    <collision>
+      <surface>
+        <bounce>
+          <restitution_coefficient>0</restitution_coefficient>
+          <threshold>1e+06</threshold>
+        </bounce>
+        <friction>
+          <torsional>
+            <coefficient>1.0</coefficient>
+            <use_patch_radius>true</use_patch_radius>
+            <patch_radius>0.1</patch_radius>
+            <surface_radius>0.1</surface_radius>
+          </torsional>
+          <ode>
+            <mu>100</mu>
+            <mu2>100</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <kp>300000</kp>
+            <kd>1000</kd>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+
+  </gazebo>
+
+
+
+</robot>

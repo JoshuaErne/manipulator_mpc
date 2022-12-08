@@ -1,0 +1,6 @@
+turntable:
+  turntable_controller:
+    type: "velocity_controllers/JointVelocityController"
+    joint: base_rotate
+    pid: {p: 50.0, d: 4.0, i_clamp: 1.0}
+    antiwindup: True

@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+
+    <model name="obs1">
+      <pose>0.6 0 0.7 0 0 0</pose>
+      <static>1</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 0.6 0.1</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <laser_retro>0</laser_retro>
+          <geometry>
+            <box>
+              <size>0.2 0.6 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+
+
+    <model name="obs2">
+      <pose>0.2 -0.0 0.15 0 0 0</pose>
+      <static>1</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.1 0.4 0.3</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <laser_retro>0</laser_retro>
+          <geometry>
+            <box>
+              <size>0.1 0.4 0.3</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+  </world>
+</sdf>

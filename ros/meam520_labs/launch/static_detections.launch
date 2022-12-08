@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="team" />
+  <param name="team" value="$(arg team)" />
+
+  <arg name="static" default="static.yaml"/>
+  <!-- <param name="static_block_configuration" value="$(arg static)" /> -->
+  <param name="static_block_configuration" textfile="$(find meam520_labs)/config/$(arg static)" />
+
+  <arg name="rvizconfig" default="$(find meam520_labs)/config/detections.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <node pkg="tf" type="static_transform_publisher" name="base_to_tag0"
+    args=".5 0 0 0 0  0  /tag0_0 /base 1"/>
+
+  <node pkg="meam520_labs" name="tf_tag_visualizer" type="detections.py" output="log" />
+
+  <node pkg="meam520_labs" name="static_pose_spoofer" type="static_poses.py" output="screen" />
+
+</launch>

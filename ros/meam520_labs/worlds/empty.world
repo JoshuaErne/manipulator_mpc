@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <gui>
+        <camera name="user_camera">
+          <pose>1.347949 -1.455909 1.670164 0 .6 2.2</pose>
+        </camera>
+    </gui>
+
+    <physics type="ode">
+      <!--
+
+        You can tweak these settings to *try* to improve your Real Time Factor.
+        Try first increasing your real_time_update_rate, and if that doesn't
+        improve things then consider increasing your step size.
+
+        Increasing your step size more than a tiny bit will result in instability
+        in the physics simulation, so it can be risky.
+
+        The product of these two parameters determines the Target Real Time Factor,
+        but due to resource constraints the simulation may run slower.
+
+        A good rule of thumb to start with is to set your real_time_update_rate to
+        1000 divided by the Real Time Factor gazebo reported when you first launched it.
+
+      -->
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+     </physics>
+
+  </world>
+</sdf>
