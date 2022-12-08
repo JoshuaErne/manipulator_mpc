@@ -628,7 +628,6 @@ class ArmController(franka_interface.ArmInterface):
         self._joint_command_publisher.publish(self._command_msg)
 
 
-
     def safe_move_to_position(self, joint_angles, timeout=10.0, threshold=0.00085, test=None):
         # The safety layer
         cur_safe = self.safe.test_new_configuration(joint_angles)

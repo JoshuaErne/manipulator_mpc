@@ -12,7 +12,7 @@ import os
 import pickle
 
 from core.interfaces import ArmController
-from lib.rrt_mpc import rrt
+from lib.rrt import rrt
 from lib.mpc import run_to_position
 
 from lib.loadmap import loadmap
@@ -74,6 +74,7 @@ if __name__ == "__main__":
         q_joints, Control_input, time, loss_vals = run_to_position(p1, p2)
 
         for idx2 in range(len(q_joints)):
+            # if idx2%25 == 0:
                 q = np.array([q_joints[idx2][0],
                             q_joints[idx2][3],
                             q_joints[idx2][6],
@@ -98,17 +99,25 @@ if __name__ == "__main__":
                                     q_joints[idx2][17],
                                     q_joints[idx2][20]])
 
-                arm.set_joint_positions_velocities(q, q_dot)
+                print("Trajectory Complete!")
+                arm.safe_set_joint_positions_velocities(q, q_dot)
+
+                ############# DONT REMOVE PRINT STATEMENTS #####################################
+                print('q: ',q)
+                print('----------')
+                print('q_dot: ',q_dot)
+                print('----------')
+
                 # arm.set_joint_positions_velocities_torque(q,  q_dot, q_ddot)
     
                 # arm.move_to_position(qq)
-                saved_state['q'].append(q)
-                saved_state['qdot'].append(q_dot)
-                saved_state['qddot'].append(q_ddot)
+                # saved_state['q'].append(q)
+                # saved_state['qdot'].append(q_dot)
+                # saved_state['qddot'].append(q_ddot)
     
-    with open("mpc_var", "wb") as fp:
-        pickle.dump(saved_state, fp)
+    # with open("mpc_var", "wb") as fp:
+    #     pickle.dump(saved_state, fp)
     
 
 
-    print("Trajectory Complete!")
+    
