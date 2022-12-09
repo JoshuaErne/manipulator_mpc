@@ -34,7 +34,7 @@ def simulate_arm(x0, x_final, tf, robotic_arm):
     current_time        = t[-1]
 
     current_u_command   = np.zeros(7)
-    current_u_command   = robotic_arm.compute_mpc_feedback(current_x, x_final, t[-1], tf)
+    current_u_command, optimal_cost   = robotic_arm.compute_mpc_feedback(current_x, x_final, t[-1], tf)
     current_u_real      = np.clip(current_u_command, robotic_arm.umin, robotic_arm.umax)
 
     # Autonomous ODE for constant inputs to work with solve_ivp
@@ -52,7 +52,7 @@ def simulate_arm(x0, x_final, tf, robotic_arm):
   x = np.array(x)
   u = np.array(u)
   t = np.array(t)
-  return x, u, t, error_list
+  return x, u, t, error_list, optimal_cost
 
 def visualize_error(error_list, t, x_final):
     error_desired = [0]*len(error_list)

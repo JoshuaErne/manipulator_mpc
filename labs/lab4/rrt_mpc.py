@@ -8,6 +8,9 @@ from time import perf_counter
 import geometry_msgs
 from visualization_msgs.msg import Marker
 
+import rospy
+from std_srvs.srv import Empty
+
 import os
 import pickle
 import time
@@ -35,47 +38,16 @@ mapNames = ["map1",
             "emptyMap"]
 
 
-if __name__ == "__main__":
+def mpc_func(path):
 
-    if len(sys.argv) < 2:
-        print("usage:\n\tpython rrt_demo.py 1\n\tpython rrt_demo.py 2\n\tpython rrt_demo.py 3 ...")
-        exit()
-
-    rospy.init_node('RRT')
-
-    print(sys.argv[1])
-    arm = ArmController()
-    index = int(sys.argv[1])-1
-    
-    print("Running test "+sys.argv[1])
-    print("Moving to Start Position")
-    
-    arm.move_to_position(starts[index])
-    map_struct = loadmap("../../maps/"+mapNames[index] + ".txt")
-    
-    print("Map = "+ mapNames[index])
-    print("Starting to plan")
-    
-    start = perf_counter()
-    path = rrt(deepcopy(map_struct), deepcopy(starts[index]), deepcopy(goals[index]))
-    stop = perf_counter()
-    dt = stop - start
-    print('--------Implementing RRT------------')
-
-    print("RRT took {time:2.2f} sec. Path is.".format(time=dt))
-    print(np.round(path,4))
-    
-    # input("Press Enter to Send Path to Arm")
-    # print(len(path))
-
-    print('-------Implementing MPC--------------')
-    
     saved_state = {'q':[], 'qdot':[], 'qddot':[]}
+    total_cost = []
 
     for idx1 in range(len(path)-1):
         p1 = path[idx1]
         p2 = path[idx1+1]
-        q_joints, Control_input, time_stamp, loss_vals = run_to_position(p1, p2)
+        q_joints, Control_input, time_stamp, loss_vals, optimal_cost = run_to_position(p1, p2)
+        total_cost.append(optimal_cost)
 
         for idx2 in range(len(q_joints)):
             # if idx2%25 == 0:
@@ -112,22 +84,186 @@ if __name__ == "__main__":
                 # print('q_dot: ',q_dot)
                 # print('----------')
                 # time.sleep(0.02)
-
-    
                 # arm.move_to_position(qq)
                 saved_state['q'].append(q)
                 saved_state['qdot'].append(q_dot)
                 saved_state['qddot'].append(q_ddot)
     
 
-    for idx in range(len(saved_state['q'])):
-        arm.set_joint_positions_velocities_torque(saved_state['q'][idx],  saved_state['qdot'][idx], saved_state['qddot'][idx])
-        time.sleep(0.02)
+    return saved_state, sum(total_cost)
+
+def speedtester(time_test, test, saved_state):
+    print('here')
 
 
-    # with open("mpc_var", "wb") as fp:
-    #     pickle.dump(saved_state, fp)
-    print("Trajectory Complete!")
+    return time_test
+
+
+if __name__ == "__main__":
+
+    if len(sys.argv) < 2:
+        print("usage:\n\tpython rrt_demo.py 1\n\tpython rrt_demo.py 2\n\tpython rrt_demo.py 3 ...")
+        exit()
+
+    rospy.init_node('RRT')
+    rospy.wait_for_service('/gazebo/reset_world')
+
+    print(sys.argv[1])
+    arm = ArmController()
+    index = int(sys.argv[1])-1
+    
+    print("Running test "+sys.argv[1])
+    print("Moving to Start Position")
+    
+    arm.move_to_position(starts[index])
+    map_struct = loadmap("../../maps/"+mapNames[index] + ".txt")
+    
+    print("Map = "+ mapNames[index])
+    print("Starting to plan")
+    
+    # start = perf_counter()
+    # path = rrt(deepcopy(map_struct), deepcopy(starts[index]), deepcopy(goals[index]))
+    # stop = perf_counter()
+    # dt = stop - start
+
+    # print("RRT took {time:2.2f} sec. Path is.".format(time=dt))
+    # print(np.round(path,4))
+    states_list = []
+    costs_list  = []
+    time_test   = {'position':[],'position_velocity':[],'position_velocity_torque':[]}
+    choose_mpc = input("RRT or RRT+MPC: I/P 1 or 2: ")
+
+    if choose_mpc == '1':
+        print('--------Implementing RRT------------')
+        path = rrt(deepcopy(map_struct), deepcopy(starts[index]), deepcopy(goals[index]))
+        for joint_set in path:
+            arm.move_to_position(joint_set)
+        print("Trajectory Complete!")
+
+
+    elif choose_mpc == '2':
+        optimize_rrt = input("Optimize RRT ??: T/F: ")
+        
+        if optimize_rrt == 'T':
+            total_paths  = input("Number of optimization Trajectories to test: Enter number between 1-10: ")
+            total_paths  = int(total_paths)
+            for i in range(total_paths):
+                print('--------Optimzation Step {}------------'.format(i))
+                print('--------Implementing RRT------------')
+                path = rrt(deepcopy(map_struct), deepcopy(starts[index]), deepcopy(goals[index]))
+                print('-------Implementing MPC--------------')
+                print()
+                saved_state, total_cost = mpc_func(path)
+                states_list.append(saved_state)
+                costs_list .append(total_cost)
+
+            print('costs_list',costs_list)
+            print('--------------------')
+
+            idx = np.argmin(np.array(costs_list))
+
+            chosen_states = states_list[idx]
+            for idx in range(len(chosen_states['q'])):
+                arm.set_joint_positions_velocities_torque(chosen_states['q'][idx],  chosen_states['qdot'][idx], chosen_states['qddot'][idx])
+                time.sleep(0.02)
+            
+
+        else:
+            print('--------Implementing RRT------------')
+            path = rrt(deepcopy(map_struct), deepcopy(starts[index]), deepcopy(goals[index]))
+            print(path)
+            saved_state, total_cost = mpc_func(path)
+            print('-------Implementing MPC--------------')
+
+            check_speeds = input("Test Speeds? Y/N: ")
+            if check_speeds == 'Y':
+                for test in range(3):
+                    # test = input("Test: Position - Enter 1 \n Test: Position - Enter 2 \n Test: Position - Enter 3 \n: ")
+                    if test == 3:
+                        # arm.move_to_position(starts[index])
+                        # print('Test: Position')
+                        start = perf_counter()
+                        for idx in range(len(saved_state['q'])):
+                            if idx%50 == 0:
+                                arm.move_to_position(saved_state['q'][idx])
+                        stop = perf_counter()
+                        print('Time for Position:', stop-start)
+                        time_test['position'].append(stop-start)
+                    
+                        for idx in reversed(range(len(saved_state['q']))):
+                            if idx%50 == 0:
+                                arm.move_to_position(saved_state['q'][idx])
+
+                        # rospy.wait_for_service('/gazebo/reset_world')
+                        # reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+                        # reset_world()
+                        # arm.move_to_position(saved_state['q'][0])
+                        stop = perf_counter()
+                        print('Time for Position (2-Way):', stop-start)
+                        print('------------------------------------------------')
+
+                    if test == 1:
+                        # arm.move_to_position(starts[index])
+                        # print('Test: Position & Velocity')
+                        start = perf_counter()
+                        for idx in range(len(saved_state['q'])):
+                                arm.safe_set_joint_positions_velocities(saved_state['q'][idx],  saved_state['qdot'][idx])
+                                time.sleep(0.01)
+                        stop = perf_counter()
+                        print('Time for Position and Velocity:', stop-start)
+                        time_test['position_velocity'].append(stop-start)
+                    
+                        for idx in reversed(range(len(saved_state['q']))):
+                            # if idx%50 == 0:
+                                # arm.move_to_position(saved_state['q'][idx])
+                                arm.safe_set_joint_positions_velocities(saved_state['q'][idx],  saved_state['qdot'][idx])
+                                time.sleep(0.01)
+                        stop = perf_counter()
+                        print('Time for Position & Velocity (2-Way):', stop-start)
+                        print('------------------------------------------------')
+
+                        # rospy.wait_for_service('/gazebo/reset_world')
+                        # reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+                        # reset_world()
+                        # arm.move_to_position(starts[index])
+                    
+                    if test == 2:
+                        # arm.move_to_position(starts[index])
+                        # print('Test: Position, Velocity, Acceleration')
+                        start = perf_counter()
+                        for idx in range(len(saved_state['q'])):
+                            arm.set_joint_positions_velocities_torque(saved_state['q'][idx],  saved_state['qdot'][idx], saved_state['qddot'][idx])
+                            time.sleep(0.02)
+                        stop = perf_counter()
+                        print('Time for Position, Velocity and Acceleration:', stop-start)
+                        time_test['position_velocity_torque'].append(stop-start)
+
+                        for idx in reversed(range(len(saved_state['q']))):
+                            # if idx%50 == 0:
+                                # arm.move_to_position(saved_state['q'][idx])
+                                arm.set_joint_positions_velocities_torque(saved_state['q'][idx],  saved_state['qdot'][idx], saved_state['qddot'][idx])
+                                time.sleep(0.02)
+                        stop = perf_counter()
+                        print('Time for Position, Velocity and Acceleration (2-way):', stop-start)
+                        print('------------------------------------------------')
+
+                        # rospy.wait_for_service('/gazebo/reset_world')
+                        # reset_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+                        # reset_world()
+                        # arm.move_to_position(starts[index])
+
+            
+            elif check_speeds == 'N':
+                for idx in range(len(saved_state['q'])):
+                    arm.set_joint_positions_velocities_torque(saved_state['q'][idx],  saved_state['qdot'][idx], saved_state['qddot'][idx])
+                    time.sleep(0.02)
+
+
+        save_as = input('Time_test_2')
+        with open('Time_test_file', "wb") as fp:
+            pickle.dump(time_test, fp)
+
+        print("Trajectory Complete!")
 
 
     

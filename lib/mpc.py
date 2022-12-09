@@ -58,7 +58,7 @@ def run_to_position(x_start, x_goal):
     x_final[15] = x_goal[5]
     x_final[18] = x_goal[6]
 
-    x, u, t, loss = simulate_arm(x0, x_final, tf, robotic_arm)
+    x, u, t, loss, optimal_cost = simulate_arm(x0, x_final, tf, robotic_arm)
 
-    return x, u, t, loss
+    return x, u, t, loss, optimal_cost
 

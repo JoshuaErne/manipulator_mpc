@@ -29,21 +29,21 @@ class Robot(object):
     self.Q      = Q
     self.R      = R
     self.Qf     = Qf
-    self.xmax   = np.array([ 2.8973,  2.1750,  15,  
-                             1.7628,  2.1750,  7.5,  
-                             2.8973,  2.1750,  10, 
-                             -0.0698, 2.1750,  12.5,  
-                             2.8973,  2.6100,  15, 
-                             3.7525,  2.6100,  20,  
-                             2.8973,  2.6100,  20])
+    self.xmax   = np.array([ 2.7,  2.0,  14.5,  
+                             1.6,  2.0,  7,  
+                             2.7,  2.0,  9.5, 
+                            -0.0,  2.0,  12,  
+                             2.7,  2.0,  14.5, 
+                             3.6,  2.0,  19.5,  
+                             2.7,  2.0,  19.5])
 
-    self.xmin   = np.array([ -2.8973,  -2.1750,  -15,  
-                             -1.7628,  -2.1750,  -7.5,  
-                             -2.8973,  -2.1750,  -10, 
-                             -3.0718,  -2.1750,  -12.5,  
-                             -2.8973,  -2.6100,  -15, 
-                             -0.0175,  -2.6100,  -20,  
-                             -2.8973,  -2.6100,  -20])
+    self.xmin   = np.array([ -2.7,  -2.0,  -14.5,  
+                             -1.6,  -2.0,  -7,  
+                             -2.7,  -2.0,  -9.5, 
+                             -3.0,  -2.0,  -12,  
+                             -2.7,  -2.0,  -14.5, 
+                             -0.0,  -2.0,  -19.5,  
+                             -2.7,  -2.0,  -19.5])
 
    
   def x_d(self):
@@ -179,10 +179,12 @@ class Robot(object):
     u_mpc = np.zeros(7)
     u_mpc = result.GetSolution(u)
     x_mpc = result.GetSolution(x)
+
+    optimal_cost = result.get_optimal_cost()
     # print("u_mpc: ", (u_mpc+(self.u_d())))
     # print("x_mpc: ", (x_mpc+(self.x_d())))
     # print("x_mpc: ", (x_mpc))
     # print("___________________________________")
     # print(" ")
 
-    return (u_mpc[0]+(self.u_d()))
+    return (u_mpc[0]+(self.u_d())), optimal_cost
