@@ -8,9 +8,9 @@ Packages- First make sure you have [panda_simulator](https://github.com/justagis
 <!-- ![rrt_algo](imgs/rrt_algo.png) -->
 
 
-<img src=imgs/convergence.png height="360" width="640" > <p></p>
+<img src=imgs/convergence.png height="489" width="567" > <p></p>
 Figure 1: Convergence curve Heirarchial MPC (obstacle avoiding waypoints generated using RRT).
 
 
-<img src=imgs/convergence_convex_set.png height="360" width="640" > <p></p>
+<img src=imgs/convergence_convex_set.png height="489" width="567" > <p></p>
 Figure 2: Convergence curve for obstacle avoidance using MPC and convex sets.
