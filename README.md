@@ -17,4 +17,4 @@ Figure 2: Convergence curve for obstacle avoidance using MPC and convex sets.
 
 
 <img src=imgs/statistics.png height="453" width="563" > <p></p>
-Figure 2: Performance of MPC algorithm.
+Figure 3: Performance of MPC algorithm.
