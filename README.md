@@ -1,4 +1,4 @@
-# Obstacle avoidance with MPC
+# MPC approaches for collision free manipulator arm control
 
 ## Usage:
 1) Install dependencies (required only for running this in ROS)-
