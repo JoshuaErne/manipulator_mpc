@@ -2,7 +2,7 @@
 
 ## Usage:
 1) Install dependencies (required only for running this in ROS)-
-Packages- First make sure you have [panda_simulator](https://github.com/justagist/panda_simulator/tree/noetic-devel); then clone this repository. Rename the file rename_meam520_labs to meam520_labs
+Packages- First make sure you have [panda_simulator](https://github.com/justagist/panda_simulator/tree/noetic-devel); then clone this repository. Rename the file rename_to_meam520_labs to meam520_labs
 2) Run this [file](/lib/convex_set/final_project.ipynb)
 
 <!-- ![rrt_algo](imgs/rrt_algo.png) -->
