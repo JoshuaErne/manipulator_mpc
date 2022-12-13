@@ -29,66 +29,83 @@ class Robot(object):
     self.Q      = Q
     self.R      = R
     self.Qf     = Qf
-    self.xmax   = np.array([ 2.7,  2.0,  14.5,  
-                             1.6,  2.0,  7,  
-                             2.7,  2.0,  9.5, 
-                            -0.0,  2.0,  12,  
-                             2.7,  2.0,  14.5, 
-                             3.6,  2.0,  19.5,  
-                             2.7,  2.0,  19.5])
 
-    self.xmin   = np.array([ -2.7,  -2.0,  -14.5,  
-                             -1.6,  -2.0,  -7,  
-                             -2.7,  -2.0,  -9.5, 
-                             -3.0,  -2.0,  -12,  
-                             -2.7,  -2.0,  -14.5, 
-                             -0.0,  -2.0,  -19.5,  
-                             -2.7,  -2.0,  -19.5])
+    #Limits are on ----------joints,  velocities, accelerations-----------------
+    self.xmax   = np.array([ 2.8973,  2.1750,  15,  
+                             1.7628,  2.1750,  7.5,  
+                             2.8973,  2.1750,  10, 
+                             -0.0698, 2.1750,  12.5,  
+                             2.8973,  2.6100,  15, 
+                             3.7525,  2.6100,  20,  
+                             2.8973,  2.6100,  20])
+    #Limits are on ----------joints,  velocities, accelerations-----------------
+    self.xmin   = np.array([ -2.8973,  -2.1750,  -15,  
+                             -1.7628,  -2.1750,  -7.5,  
+                             -2.8973,  -2.1750,  -10, 
+                             -3.0718,  -2.1750,  -12.5,  
+                             -2.8973,  -2.6100,  -15, 
+                             -0.0175,  -2.6100,  -20,  
+                             -2.8973,  -2.6100,  -20])
 
-   
+    self.xl = []
+    self.xu = []
+
+  def new_constraints(self, new_constraints_param):
+    self.xu.append(np.array([np.abs(new_constraints_param[0]),  2.1750,  15,  
+                             np.abs(new_constraints_param[1]), 2.1750,  7.5,  
+                             np.abs(new_constraints_param[2]), 2.1750,  10, 
+                             np.abs(new_constraints_param[3]), 2.1750,  12.5,  
+                             np.abs(new_constraints_param[4]), 2.6100,  15, 
+                             np.abs(new_constraints_param[5]), 2.6100,  20,  
+                             np.abs(new_constraints_param[6]), 2.6100,  20]))
+
+
+    self.xl.append(np.array([(-1) * np.abs(new_constraints_param[0]), - 2.1750, - 15,  
+                             (-1) * np.abs(new_constraints_param[1]), -2.1750,  -7.5,  
+                             (-1) * np.abs(new_constraints_param[2]), -2.1750,  -10, 
+                             (-1) * np.abs(new_constraints_param[3]), -2.1750,  -12.5,  
+                             (-1) * np.abs(new_constraints_param[4]), -2.6100,  -15, 
+                             (-1) * np.abs(new_constraints_param[5]), -2.6100,  -20,  
+                             (-1) * np.abs(new_constraints_param[6]), -2.6100,  -20]))
+
+
+  def add_obs_constraint(self, prog, x, q_avoid_list, N, side = 4, center = 0.75):
+
+        limit_val = np.arctan2(side, (center-(side/2))) - np.arctan2((side/2), (center/2)-(center-(side/2))) # Obstacle is cube of side 0.25 and 0.5m away from robot in XY plane. This helps maintain a buffer and cover all possible configurations in the 7 dimensional hyperplane.
+        for k in range(len(q_avoid_list)):
+            for horizon in range(N):
+                q_in_x = np.array([x[horizon][0], x[horizon][3], x[horizon][6], x[horizon][9], x[horizon][12], x[horizon][15], x[horizon][18]])
+                prog.AddLinearConstraint(np.mean(q_in_x-np.array(q_avoid_list))<=limit_val) # converge to a convex pocket near the obstacle
+
+
   def x_d(self):
     # Nominal state
-    xd_ = np.array([np.pi/2, 0, 0, 0, 0, 0, 0, 0, 0, -np.pi/2, 0, 0, 0, 0, 0, np.pi/2, 0, 0 , np.pi/4, 0, 0])
     return np.zeros(21)
 
 
   def u_d(self):
     # Nominal input
-    # return np.array([self.m*self.g/2, self.m*self.g/2])
     return np.zeros(7)
 
   def continuous_time_full_dynamics(self, x, u):
     Ac = np.array([[0, 1, 0],
                    [0, 0, 1],
                    [0, 0, 0]])
+    
     Bc = np.array([[0],[0],[1]])
     
+    #Expand for 7D
     Acontinuous = block_diag(Ac, Ac, Ac, Ac, Ac, Ac, Ac)
     Bcontinuous = block_diag(Bc, Bc, Bc, Bc, Bc, Bc, Bc)
     xdot = Acontinuous@(x) + Bcontinuous@(u) 
     return xdot
 
+
   def discrete_time_linearized_dynamics(self, N, time, tf):
-    """
-    Model function
-    Generates the model matrixes A, B and Dz\n
-        h is the sampling period\n
-        n is the number of degrees of freedom (3 per joint; 1, 2 or 3 joints)
-    """
-    # span      = 1
-    # step_size = 0.02
-    # m         = 7
-    # n         = 21                                          #No. of degrees of freedom
-    # I         = np.identity(n)
-    # time      = np.arange(start=0,stop=span,step=step_size)
-    
     n               = 21
     I               = np.identity(n) 
-    tsim            = tf - time                    #Simulation Time
+    tsim            = tf - time
     h               = tsim/(N-1)
-    # print("h ",h)
-    # print("tsim ",tsim)
-    # print("tf ", tf)
     
     phi_tilde       = np.array([[1, h, h**2/2], 
                                 [0, 1,      h], 
@@ -103,16 +120,10 @@ class Robot(object):
     phi             = block_diag(phi_tilde,     phi_tilde,      phi_tilde,      phi_tilde,      phi_tilde,      phi_tilde,      phi_tilde)
     gamma1          = block_diag(gamma1_tilde,  gamma1_tilde,   gamma1_tilde,   gamma1_tilde,   gamma1_tilde,   gamma1_tilde,   gamma1_tilde)
     gamma           = block_diag(gamma_tilde,   gamma_tilde,    gamma_tilde,    gamma_tilde,    gamma_tilde,    gamma_tilde,    gamma_tilde)
-    # A_d             = phi
-    # B_d             = gamma + (phi - I)@(gamma1)/h
-    # Dz              = gamma1/h 
 
     return phi, gamma, gamma1, h
 
   def add_initial_state_constraint(self, prog, x, x_current):
-    """THIS"""
-    # prog.AddBoundingBoxConstraint(x_current, x_current, x[0]) # prog.AddBoundingBoxConstraint(lb, ub, var)
-    """ OR """
     prog.AddLinearEqualityConstraint(x[0] - x_current, np.zeros(21))
 
   def add_final_state_constraint(self, prog, x, x_final):
@@ -126,12 +137,8 @@ class Robot(object):
 
 
   def add_dynamics_constraint(self, prog, x, u, N, time, tf):
-    # pdb.set_trace()
     phi, gamma, gamma1, h = self.discrete_time_linearized_dynamics(N, time, tf)
-    # print(x)
-    # print(np.shape(x))
     for k in range(1, N-1):
-        # print(k)
         prog.AddLinearEqualityConstraint(x[k]-  phi@(x[k-1]) - (gamma1/h)@(u[k]) - (gamma - gamma1/h)@(u[k-1]), np.zeros(21))
 
 
@@ -139,11 +146,9 @@ class Robot(object):
     for l in range(0, N-1):
         err = x[l]-x_final
         prog.AddQuadraticCost(err.T@(self.Q)@(err) + u[l].T@(self.R)@(u[l]))
-        # prog.AddQuadraticCost((x[l].T@(self.Q)@(x[l]) + u[l].T@(self.R)@(u[l])))
-        # raise
     prog.AddQuadraticCost((x[-1]-x_final)@(self.Q)@((x[-1]-x_final)))
 
-
+  # def compute_mpc_feedback(self, x_current, x_final, time, qconvex, tf):
   def compute_mpc_feedback(self, x_current, x_final, time, tf):
     '''
     This function computes the MPC controller input u
@@ -168,6 +173,10 @@ class Robot(object):
     self.add_input_saturation_constraint(prog, x, u, N)
     self.add_dynamics_constraint(prog, x, u, N, time, tf)
 
+    ##################### Uncomment this function to test for MPC based on Convex sub-regions #############################
+    #Add obstacle Cost
+    # self.add_obs_constraint(prog, x, qconvex, N)
+
     
     self.add_cost(prog, x, x_final, u, N)
 
@@ -181,10 +190,5 @@ class Robot(object):
     x_mpc = result.GetSolution(x)
 
     optimal_cost = result.get_optimal_cost()
-    # print("u_mpc: ", (u_mpc+(self.u_d())))
-    # print("x_mpc: ", (x_mpc+(self.x_d())))
-    # print("x_mpc: ", (x_mpc))
-    # print("___________________________________")
-    # print(" ")
 
     return (u_mpc[0]+(self.u_d())), optimal_cost

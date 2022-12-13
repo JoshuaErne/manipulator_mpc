@@ -18,7 +18,7 @@ from gazebo_msgs.srv import SpawnModel
 spawn_model_client = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
 
 
-path = os.path.expanduser('~/meam520_ws/src/meam520_labs/ros/meam520_labs/urdf/cube.xacro')
+path = os.path.expanduser('/home/josh/Desktop/meam520_drake/src/meam520_labs/ros/meam520_labs/urdf/cube.xacro')
 command = 'rosrun xacro xacro '+path+' color:='
 colors = ["'0.043 0.611 0.192 1'","'.25 .15 .5 1'"]
 xmls = [subprocess.check_output(command+color,shell=True).decode('utf-8') for color in colors]
@@ -35,7 +35,8 @@ def place(x,y,z,type):
     p = np.random.randint(0,3) * 2 * np.pi / 4
     y = np.random.rand(1) * 2 * pi
     q = tf.transformations.quaternion_from_euler(r,p,y)
-    pose.orientation.x = q[0]
+
+    pose.orientation.x = q[0] 
     pose.orientation.y = q[1]
     pose.orientation.z = q[2]
     pose.orientation.w = q[3]
@@ -60,18 +61,21 @@ def noise(radius):
 
 # for i in [1]:
 #     for j in [1]:
-for i in [-1,1]:
-    for j in [-1,1]:
-        x = .562 + 2.5*.0254 * i
-        y = 1.147 + 2.5*.0254 * j
-        place(x + noise(.025) ,y + noise(.025),.23,'static')
-        place(x + noise(.025) ,-y + noise(.025),.23,'static')
+# for i in [-1,1]:
+#     for j in [-1,1]:
+#         x = .562 + 2.5*.0254 * i
+#         y = 1.147 + 2.5*.0254 * j
+#         place(x + noise(.025) ,y + noise(.025),.23,'static')
+#         place(x + noise(.025) ,-y + noise(.025),.23,'static')
 
 # n = 1
-n = 8
+n = 1
 r = 9.5*.0254
-for i in range(n):
-    place((r + noise(.0254)) * cos(2*pi/n * (i + noise(pi/n))),(r + noise(r/5)) * sin(2*pi/n * (i + noise(pi/n))),.23,'dynamic')
+# for i in range(n):
+#     place((r + noise(.0254)) * cos(2*pi/n * (i + noise(pi/n))),(r + noise(r/5)) * sin(2*pi/n * (i + noise(pi/n))),.23,'dynamic')
+
+place(r  * cos(2*pi/n) + 0.02 ,r * sin(2*pi/n),.23,'dynamic')
+
 
 
 

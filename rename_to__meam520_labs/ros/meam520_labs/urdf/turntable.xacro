@@ -12,7 +12,7 @@
       </actuator>
     </transmission>
 
-    <xacro:property name="base_radius" value="0.3048" />
+    <xacro:property name="base_radius" value="1.1" />
     <xacro:property name="total_height" value="0.02" />
 
     <link name="world"></link>
@@ -20,7 +20,7 @@
       <visual>
         <origin xyz="0 0 ${-3*total_height/4}" rpy="0 0 0"/>
         <geometry>
-          <cylinder length="${total_height/2}" radius="${base_radius/2}"/>
+          <cylinder length="${total_height/2}" radius="${base_radius/8}"/>
         </geometry>
       </visual>
       <collision>
@@ -78,15 +78,12 @@
 
 
   <gazebo reference="base">
-    <material>Gazebo/DarkGrey</material>
+    <material>Gazebo/GreyTransparent</material>
+    <transparency>1</transparency>
   </gazebo>
   <gazebo reference="upper_base">
-    <material>
-      <ambient>.8 .8 .8 1</ambient>
-      <diffuse>.8 .8 .8 1</diffuse>
-      <specular>.8 .8 .8 1</specular>
-      <emissive>0 0 0 0</emissive>
-    </material>
+    <material>Gazebo/GreyTransparent</material>
+    <transparency>1</transparency>
     <collision>
       <surface>
         <bounce>

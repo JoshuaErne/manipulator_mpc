@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="block_delay" default="5" />
+  <arg name="rviz" default="false" />
+  <arg name="rvizconfig" default="$(find meam520_labs)/config/mpc_final.rviz" />
+
+  <!-- BASIC ENVIRONMENT -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- <arg name="world_name" value="$(find meam520_labs)/worlds/mpc_final.world"/> -->
+    <arg name="paused" value="false" />
+  </include>
+
+  <!-- MOVING TURNTABLE -->
+  <include file="$(find meam520_labs)/launch/object.launch" ns="turntable" />
+
+  <!-- SCORABLE OBJECTS -->
+  <node pkg="meam520_labs" name="block_spawner" type="block_spawner.py" output="screen"
+    launch-prefix="bash -c 'sleep $(arg block_delay); $0 $@' "/>/>
+
+    <include file="$(find meam520_labs)/launch/single.launch">
+      <arg name="load_gazebo" value="false" />
+      <arg name="x" value="0"/>
+      <arg name="y" value="0" />
+      <!-- <arg name="y" value="-.978" if="$(eval arg('team') == 'red')"/>
+      <arg name="y" value=".978" if="$(eval arg('team') == 'blue')"/> -->
+      <arg name="z" value="0"/>
+      <arg name="roll" value="0"/>
+      <arg name="pitch" value="0"/>
+      <arg name="yaw" value="0"/>
+    </include>
+
+    <!-- <node pkg="tf" type="static_transform_publisher" name="camera_transform"
+      args="0 0 2 0 3.14 0  /base /camera  1"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="tag_transform"
+      args="-.5 0 0 0 0 0  /base /calibration_tag  1"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="world_transform"
+      args="0 $(arg y) 0 0 0 0  /world_frame /world  1"/> -->
+
+    <group if="$(arg rviz)">
+      <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+     </group>
+
+</launch>

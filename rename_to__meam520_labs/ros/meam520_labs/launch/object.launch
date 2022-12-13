@@ -3,8 +3,9 @@
 
   <!-- LAZY SUSAN TURNTABLE -->
 
-  <arg name="table_height" default=".2" />
-  <arg name="control_delay" default="5"/>
+  <arg name="object_z" default=".2" />
+  <arg name="object_x" default="1.2" />
+  <arg name="control_delay" default="8"/>
 
   <param name="robot_description" command="$(find xacro)/xacro $(find meam520_labs)/urdf/turntable.xacro" />
 
@@ -12,7 +13,7 @@
 
   <!-- Spawn a turntable into Gazebo -->
   <node name="spawn_table" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model turntable
-  -x 0 -y 0 -z $(arg table_height)
+  -x $(arg object_x)  -y 0 -z $(arg object_z)
   -R 0 -P 0 -Y 0
   -robot_namespace turntable
   " />

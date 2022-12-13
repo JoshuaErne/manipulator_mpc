@@ -31,13 +31,13 @@
 
 
     <model name="obs2">
-      <pose>0.2 -0.0 0.15 0 0 0</pose>
+      <pose>0.3 -0.0 0.15 0 0 0</pose>
       <static>1</static>
       <link name="link">
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.4 0.3</size>
+              <size>0.1 0.4 0.2</size>
             </box>
           </geometry>
         </visual>
@@ -45,7 +45,7 @@
           <laser_retro>0</laser_retro>
           <geometry>
             <box>
-              <size>0.1 0.4 0.3</size>
+              <size>0.1 0.4 0.2</size>
             </box>
           </geometry>
         </collision>
