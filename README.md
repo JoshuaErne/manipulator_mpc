@@ -23,7 +23,7 @@ Figure 4: Convergence curve for obstacle avoidance using MPC and convex sets.
 <img src=imgs/statistics.png height="453" width="563" > <p></p>
 Figure 5: Performance of MPC algorithm.
 
-<img src=imgs/mpctesetcases.png height="453" width="563" > <p></p>
+<img src=imgs/mpctestcases.png height="453" width="563" > <p></p>
 Figure 6: Time taken by different control algorithms to manipulate robot (in seconds)
 
 <img src=imgs/Joint_pos.png height="453" width="563" > <p></p>
