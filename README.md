@@ -1,5 +1,21 @@
 # MPC approaches for collision free manipulator arm control
 
+## Our Project
+Operation of robotic arms in most industrial settings
+require predefined trajectories for control and optimization. Most
+applications require obstacle avoidance and interaction at a
+higher level of abstraction. In this work, we present an approach
+to implement an online planning and control mechanism for
+safe control of a 7 degree of freedom (DoF) robotic arm. We
+discuss two approaches to implement static and dynamic obstacle
+avoidance. We validate our algorithm on multiple maps with
+objects of increasing complexity in the simulation environment
+Gazebo. The robots are controlled using the Robot Operating
+System (ROS). We demonstrate, that our approach is real-time
+capable and, quite possible to execute despite having 21 variables
+in the state vector and numerous constraints which significantly
+increase the system complexity.
+
 ## Usage:
 1) Install dependencies (required only for running this in ROS)-
 Packages- First make sure you have [panda_simulator](https://github.com/justagist/panda_simulator/tree/noetic-devel); then clone this repository. Rename the file rename_to_meam520_labs to meam520_labs
