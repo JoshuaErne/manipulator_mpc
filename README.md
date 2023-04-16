@@ -8,6 +8,25 @@ Packages- First make sure you have [panda_simulator](https://github.com/justagis
 <!-- ![rrt_algo](imgs/rrt_algo.png) -->
 
 ## Performance:
+
+<table class="centerTable">
+  <tr>
+      <td align = "center"> <img src="./imgs/franka_mpc.gif"> </td>
+  </tr>
+  <tr>
+      <td align = "center"> MPC on 7 DoF FrankaPanda Arm</td>
+  </tr>
+</table>
+
+<table class="centerTable">
+  <tr>
+      <td align = "center"> <img src="./imgs/mpc_arm_gif.gif"> </td>
+  </tr>
+  <tr>
+      <td align = "center"> Simulation in Gazebo</td>
+  </tr>
+</table>
+
 <img src=imgs/pandampc.png height="489" width="567" > <p></p>
 Figure 1: Trajectory optimization using RRT and MPC
 
